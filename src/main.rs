@@ -48,9 +48,9 @@ fn main() {
 
         xlib::XSetErrorHandler(Some(error));
 
-        //xlib::XGrabButton(display, 1, xlib::AnyModifier, xlib::XDefaultRootWindow(display), 1, xlib::ButtonPressMask as c_uint, xlib::GrabModeAsync, xlib::GrabModeAsync, 0, 0);
-        xlib::XGrabButton(display, 1, xlib::Mod1Mask, xlib::XDefaultRootWindow(display), 1, (xlib::ButtonPressMask|xlib::ButtonReleaseMask|xlib::PointerMotionMask) as c_uint, xlib::GrabModeAsync, xlib::GrabModeAsync, 0, 0);
-        xlib::XGrabButton(display, 3, xlib::Mod1Mask, xlib::XDefaultRootWindow(display), 1, (xlib::ButtonPressMask|xlib::ButtonReleaseMask|xlib::PointerMotionMask) as c_uint, xlib::GrabModeAsync, xlib::GrabModeAsync, 0, 0);
+        xlib::XGrabButton(display, 1, xlib::Mod1Mask, root, 1, (xlib::ButtonPressMask|xlib::ButtonReleaseMask|xlib::PointerMotionMask) as c_uint, xlib::GrabModeAsync, xlib::GrabModeAsync, 0, 0);
+        xlib::XGrabButton(display, 1, xlib::ShiftMask, root, 1, xlib::ButtonPressMask as c_uint, xlib::GrabModeAsync, xlib::GrabModeAsync, 0, 0);
+        xlib::XGrabButton(display, 3, xlib::Mod1Mask, root, 1, (xlib::ButtonPressMask|xlib::ButtonReleaseMask|xlib::PointerMotionMask) as c_uint, xlib::GrabModeAsync, xlib::GrabModeAsync, 0, 0);
     }
 
     // Rust was a mistake Rust was a mistake Rust was a mistake
@@ -65,14 +65,12 @@ fn main() {
             // Is this even worth doing in Rust?
             xlib::ButtonPress => unsafe {
                 if event.button.subwindow != 0 {
-                    if (event.button.state & xlib::Mod1Mask) != 0 {
+                    if (event.button.state & xlib::Mod1Mask) == xlib::Mod1Mask {
                         xlib::XGetWindowAttributes(display, event.button.subwindow, &mut window_attributes);
                         start_drag = Option::from((event.button.x_root, event.button.y_root, event.button.button, event.button.subwindow));
-                    } else if event.button.subwindow != top_window {
+                    } else if top_window != event.button.subwindow { // Assumed state = ShiftMask
                         xlib::XRaiseWindow(display, event.button.subwindow);
                         top_window = event.button.subwindow;
-                    } else {
-                        xlib::XSendEvent(display, event.button.window, 0, xlib::NoEventMask, &mut event);
                     }
                 }
             },
