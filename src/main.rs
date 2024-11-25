@@ -41,7 +41,9 @@ fn get_window_attributes(display: *mut xlib::Display, window: xlib::Window) -> x
 
 fn frame_window(display: *mut xlib::Display, root_window: std::ffi::c_ulong, window: xlib::Window) -> c_ulong {
     let border_thickness: u32 = 2;
-    let border_color: u64 = 0xFF0000;
+    let top_size: u32 = 0;
+    let top_size_real: u32 = max(top_size as i64 - border_thickness as i64, 0) as u32;
+    let border_color: u64 = 0xEFEFFF;
 
     let attr = get_window_attributes(display, window);
 
@@ -52,16 +54,16 @@ fn frame_window(display: *mut xlib::Display, root_window: std::ffi::c_ulong, win
             attr.x,
             attr.y,
             attr.width as u32,
-            attr.height as u32,
+            top_size_real + attr.height as u32,
             border_thickness,
             border_color,
-            0x000000
+            border_color
         )
     };
     unsafe {
         xlib::XSelectInput(display, frame, SubstructureNotifyMask | SubstructureRedirectMask);
         xlib::XAddToSaveSet(display, window);
-        xlib::XReparentWindow(display, window, frame, 0, 0);
+        xlib::XReparentWindow(display, window, frame, 0, top_size_real as c_int);
         xlib::XMapWindow(display, frame);
 
         // XQuartz didn't like alt-f4 so I just did ctrl-q
@@ -105,8 +107,6 @@ fn main() {
         xlib::XSync(display, false as c_int);
 
         xlib::XSetErrorHandler(Some(error));
-
-
     }
 
     // Rust was a mistake Rust was a mistake Rust was a mistake
