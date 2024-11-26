@@ -1,3 +1,6 @@
+// The majority of this project is somewhat lifted from TinyWM and jichu4n's basic_wm.
+// And when I say lifted I mean not at all because both are better written and in C and C++ respectively.
+// FFI types are my new reason to continue hating Rust, but the syntax is starting to catch on me.
 extern crate x11;
 
 use std::cmp::max;
